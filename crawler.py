@@ -48,6 +48,7 @@ class Crawler:
 
         # Write Analytics File
         self.write_file()
+        return self.dowloaded
 
     def fetch_url(self, url):
         """

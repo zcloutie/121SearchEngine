@@ -3,9 +3,9 @@ import re
 import time
 
 
-def run_program(arg):
+def run_tokenizer(arg):
     '''Main function that opens and iterates through the file, calls tokenize
-    and print output functions'''
+    and returns output functions'''
 
     # Complexity - linear
     # 1x : 1.23 sec
@@ -36,8 +36,9 @@ def run_program(arg):
                     else:
                         dic[word] = 1
                         
-        print_output(dic)
+        #print_output(dic)
         end = time.time()
+        return dic
                         
     except Exception as e:
         
