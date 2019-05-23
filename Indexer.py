@@ -15,15 +15,16 @@ def index():
     with open("WEBPAGES_RAW/bookkeeping.json", 'r') as bookkeeping:
         datastore = json.load(bookkeeping)
     for key in datastore:
-        html = open("WEBPAGES_RAW/{}".format(key), "r")
-        soup = BeautifulSoup(html)
+        html = open("WEBPAGES_RAW/{}".format(key), "rb")
+        soup = BeautifulSoup(html, 'lxml')
         for script in soup(["script","style"]):
             script.extract()
         text = soup.get_text()
         lines = (line.strip() for line in text.splitlines())
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
         text = '\n'.join(chunk for chunk in chunks if chunk)
-        print("FILE: {} -------------------".format(key))
+        html.close()
+        print("FILE: {} --------------------------------------".format(key))
         print(text)
 
 if __name__ == "__main__":
