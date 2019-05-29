@@ -12,8 +12,8 @@ class mongo_instance():
 
             { "term" : "informatics",
               "postings" : {
-                  "0/0" : [tf-idf, tf, inTitle, inH1, inH2, inBold],
-                  "0/1" : [tf-idf, tf, inTitle, inH1, inH2, inBold]
+                  "0/0" : [tf-idf, tf, {inTitle, inH1, inH2, inBold}],
+                  "0/1" : [tf-idf, tf, {inTitle, inH1, inH2, inBold}]
                 }
             }
         '''
@@ -40,4 +40,9 @@ class mongo_instance():
         
         for x in self.mytbl.find():
             print(x)
+
+    def del_table(self):
+        ''' Drop table when needed '''
+
+        self.mytbl.drop()
 
