@@ -1,10 +1,12 @@
 import json
 import re
+import sys
 
 from db_driver import *
 from stop_words import get_stop_words
 from bs4 import BeautifulSoup
 
+db = {}
 
 def tokenize(line_of_text):
     ''' Handle the text tokenization'''
@@ -12,10 +14,16 @@ def tokenize(line_of_text):
     # Regex: Replace everything that doesn't start with a word character with a space.
     # This also excludes non-english characters from the line of text.
     token = re.compile('[^a-z0-9]')
-    
-    return_list = re.sub(token, " ", line_of_text.lower())
+    split_line = line_of_text.split()
+    return_list = []
 
-    return return_list.split()
+    for x in split_line:
+        string =(re.sub(token, " ", x.lower()))
+        string += " "
+        for i in string.split():
+            return_list.append(i)
+
+    return return_list
 
 
 def parse_html():
@@ -66,13 +74,15 @@ def parse_html():
         for script in soup(["title","b","h1","h2","script","table","style"]):
             script.extract()
         
-        # Tokenize the rest of the text and remove stop_words (~175)  
-        main_text = tokenize(soup.get_text())
-        lesser_text = [x for x in main_text if x not in stop_words]
+        # Tokenize the rest of the text and remove stop_words (~175)
+        p_text = soup.get_text().split()
+        for y in p_text:
+            main_text = tokenize(y)
+            lesser_text = [x for x in main_text if x not in stop_words]
         
         # Handle main text for a page
-        for word in lesser_text:
-            db_ops(word, key_pair, "p")
+            for word in lesser_text:
+                db_ops(word, key_pair, "p")
         
         html.close()
 
@@ -83,35 +93,33 @@ def parse_html():
 
 def db_ops(word, key_pair, tag):
     ''' Do DB operations '''
-
-    # Database
-    db_instance = mongo_instance()
-
-    dict_term = db_instance.find_term(word)
-    new_term = db_instance.find_term(word)
-                
+    
     # If word is not in index, add a new entry
-    if dict_term == None:
-        new_dict = {"term" : word, "postings" : {key_pair : [0, 1, tag]}}
-        db_instance.insert(new_dict)
+    if word not in db:
+        db[word] = {key_pair:{"tags":{tag},"tf":1}}
                     
     # If word is in index and doesn't have posting, add record for file
-    elif key_pair not in dict_term["postings"]:
+    elif key_pair not in db[word]:
 
-        new_term["postings"][key_pair] = [0, 1, tag]
-        db_instance.update(dict_term, new_term)
+        db[word][key_pair] = {"tags":{tag}, "tf": 1}
                     
     # If word is in index and has posting, update frequency / tag
     else:
-        new_term["postings"][key_pair][1] += 1
-        
-        if tag not in new_term["postings"][key_pair]:
-            new_term["postings"][key_pair].append(tag)
-            
-        db_instance.update(dict_term, new_term)
+
+        db[word][key_pair]["tags"].add(tag)
+        db[word][key_pair]["tf"] += 1
         
     
 if __name__ == "__main__":
-    
+
+    db.clear()
+    sys.setrecursionlimit(10000)
     # Run the index
     parse_html()
+    f= open("index.txt","w+")
+    for word in db:
+        df = len(db[word])
+        db[word]["df"] = df
+        f.write("{} : {}".format(word, db[word]))
+    f.close()
+    sys.setrecursionlimit(1000)
