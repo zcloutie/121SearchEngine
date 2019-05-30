@@ -1,6 +1,7 @@
 import json
 import re
 import sys
+import gc
 
 from db_driver import *
 from stop_words import get_stop_words
@@ -45,9 +46,13 @@ def parse_html():
 
         # Fastest method to parse is lxml according to documentation.
         soup = BeautifulSoup(html, 'lxml')
+        html.close()
 
         # Fix broken HTML
-        soup.prettify()
+        try:
+            soup.prettify()
+        except:
+            gc.collect()
 
         # Find and tokenize titles, bold, h1, and h2 tags.
         titles = soup.find_all("title")
@@ -84,8 +89,8 @@ def parse_html():
             for word in lesser_text:
                 db_ops(word, key_pair, "p")
         
-        html.close()
-
+        
+        soup.decompose()
         count +=1
         print(f'{(count/37500)*100}%')
         print("FILE: {} --------------------------------------".format(key_pair))
@@ -120,6 +125,6 @@ if __name__ == "__main__":
     for word in db:
         df = len(db[word])
         db[word]["df"] = df
-        f.write("{} : {}".format(word, db[word]))
+        f.write("{}:{}".format(word, db[word]))
     f.close()
     sys.setrecursionlimit(1000)
