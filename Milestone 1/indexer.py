@@ -120,32 +120,29 @@ def db_ops(word, key_pair, tag):
 
 
         
-def tfidf(d):
+def tfidf():
     #TF-IDF is TF X IDF
     #TF is the amount of times a term appears divided by the total amount of terms
     #IDF is Log base 10(Total num of docs/number of docs term appears in)
-    for word in d:
-        idf = math.log(N/len(d[word]),10)
-        for doc in word:
-            return
-
-def tf(key_pair):
-    html = open("../WEBPAGES_RAW/{}".format(key_pair), "rb")
-    soup = BeautifulSoup(html, 'lxml')
-    html.close()
-
-    # We get the words within paragrphs
-    text_p = (''.join(s.findAll(text=True))for s in soup.findAll('p'))
-    c_p = Counter((x.rstrip(punctuation).lower() for y in text_p for x in y.split()))
-
-    # We get the words within divs
-    text_div = (''.join(s.findAll(text=True))for s in soup.findAll('div'))
-    c_div = Counter((x.rstrip(punctuation).lower() for y in text_div for x in y.split()))
-
-    # We sum the two counters and get a list with words count from most to less common
-    total = c_div + c_p
-
-    return
+    result = db
+    count = 0
+    files = {}
+    for word in db:
+        print(f'{(count/len(db))*100}%')
+        idf = math.log(N/len(db[word]),10)
+        for doc in db[word].keys():
+            if doc not in files:
+                files[doc] = total_words(doc)
+            tf = db[word][doc]["tf"]/files[doc]
+            result[word][doc]["tf-idf"] = tf*idf
+        count+=1
+    return result
+def total_words(key_pair):
+    count = 0
+    for word in db:
+        if key_pair in db[word]:
+            count+=db[word][key_pair]["tf"]
+    return count
 
     
 if __name__ == "__main__":
