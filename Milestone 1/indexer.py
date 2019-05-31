@@ -2,11 +2,17 @@ import json
 import re
 import sys
 import gc
+import math
 
 from stop_words import get_stop_words
 from bs4 import BeautifulSoup
+from collections import Counter
+from string import punctuation
 
 db = {}
+
+#Number of files in corpus
+N = 37497
 
 def tokenize(line_of_text):
     '''Handle the text tokenization'''
@@ -111,7 +117,60 @@ def db_ops(word, key_pair, tag):
         if tag not in db[word][key_pair]["tags"]:
             db[word][key_pair]["tags"].append(tag)
         db[word][key_pair]["tf"] += 1
-     
+
+
+        
+def tfidf(d):
+    #TF-IDF is TF X IDF
+    #TF is the amount of times a term appears divided by the total amount of terms
+    #IDF is Log base 10(Total num of docs/number of docs term appears in)
+    for word in d:
+        idf = math.log(N/len(d[word]),10)
+        for doc in word:
+            return
+
+def tf(key_pair):
+    html = open("../WEBPAGES_RAW/{}".format(key_pair), "rb")
+    soup = BeautifulSoup(html, 'lxml')
+    html.close()
+
+    # We get the words within paragrphs
+    text_p = (''.join(s.findAll(text=True))for s in soup.findAll('p'))
+    c_p = Counter((x.rstrip(punctuation).lower() for y in text_p for x in y.split()))
+
+    # We get the words within divs
+    text_div = (''.join(s.findAll(text=True))for s in soup.findAll('div'))
+    c_div = Counter((x.rstrip(punctuation).lower() for y in text_div for x in y.split()))
+
+    # We sum the two counters and get a list with words count from most to less common
+    total = c_div + c_p
+
+    return
+
+def first_milestone():
+    ''' Run this in the shell to input basic queries to get results '''
+
+    with open("index.json", "r") as db:
+        full_index = json.load(db)
+        print("loaded")
+
+    with open("../WEBPAGES_RAW/bookkeeping.json", 'r') as bookkeeping:
+        datastore = json.load(bookkeeping)
+
+    print(f"Number of Documents: {37497}\n")
+    print(f"Number of Terms: {len(full_index.keys())}\n")
+    print("Index Size (KB):\n")
+
+    while True:
+    
+        user_input = input("Please input a simple query: ")
+        key_pair_dic = full_index[user_input]
+
+        for key in key_pair_dic.keys():
+            print(datastore[key])
+
+
+
     
 if __name__ == "__main__":
 
