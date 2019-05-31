@@ -147,30 +147,6 @@ def tf(key_pair):
 
     return
 
-def first_milestone():
-    ''' Run this in the shell to input basic queries to get results '''
-
-    with open("index.json", "r") as db:
-        full_index = json.load(db)
-        print("loaded")
-
-    with open("../WEBPAGES_RAW/bookkeeping.json", 'r') as bookkeeping:
-        datastore = json.load(bookkeeping)
-
-    print(f"Number of Documents: {37497}\n")
-    print(f"Number of Terms: {len(full_index.keys())}\n")
-    print("Index Size (KB):\n")
-
-    while True:
-    
-        user_input = input("Please input a simple query: ")
-        key_pair_dic = full_index[user_input]
-
-        for key in key_pair_dic.keys():
-            print(datastore[key])
-
-
-
     
 if __name__ == "__main__":
 
