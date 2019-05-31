@@ -85,11 +85,11 @@ def parse_html():
         
         soup.decompose()
         count +=1
-        print(f'{(count/37500)*100}%')
-        print("FILE: {} --------------------------------------".format(key_pair))
 
-        if len(db.keys()) > 2000:
-            return
+        if count in [375, 1875, 3750, 7500, 15000, 20000, 25000, 30000, 35000]:
+            print(f'{(count/37500)*100}%')
+        # print("FILE: {} --------------------------------------".format(key_pair))
+
 
 def db_ops(word, key_pair, tag):
     ''' Do DB operations '''
@@ -116,6 +116,7 @@ def first_milestone():
 
     with open("index.json", "r") as db:
         full_index = json.load(db)
+        print("loaded")
 
     with open("../WEBPAGES_RAW/bookkeeping.json", 'r') as bookkeeping:
         datastore = json.load(bookkeeping)
