@@ -68,7 +68,7 @@ def query_cosine_vectors(list_of_query_terms):
         
         if word in full_index.keys():
             for key_pair in full_index[word]:
-                results.append((key_pair, full_index[word][key_pair]["tf"]*tag_weight(full_index[word][key_pair]["tags"])))
+                results.append((key_pair, full_index[word][key_pair]["tf-idf"]*tag_weight(full_index[word][key_pair]["tags"])))
             run_interface(results)
             
         else:
@@ -76,6 +76,18 @@ def query_cosine_vectors(list_of_query_terms):
         
     else:
 
+        for words in list_of_query_terms:
+            for key_pair in full_index[words]:
+                if key_pair not in results:
+                    results.append((key_pair, full_index[words][key_pair]["tf-idf"]*tag_weight(full_index[words][key_pair]["tags"])))
+                else:
+                    for tuples in results:
+                        if tuples[0] == key_pair:
+                            tuples[1] += full_index[words][key_pair]["tf-idf"]*tag_weight(full_index[words][key_pair]["tags"])
+                                                                                         
+        run_interface(results)
+                
+        '''
         # Calculate tf-idf for each query term & generate candidate list.
         for term in list_of_query_terms:
             
@@ -99,7 +111,7 @@ def query_cosine_vectors(list_of_query_terms):
                 query_vector[index] = query_dict[term]
 
         doc_and_call(query_vector, candidates)
-
+        '''
 
 def doc_and_call(query_vector, candidate_list):
     ''' Create document vector and write cosines to results '''
@@ -109,10 +121,10 @@ def doc_and_call(query_vector, candidate_list):
     # Only consider documents that pass as a candidate.
     count = 0
     
-    for key_pair in candidate_list:
+    for key_pair in candidate:
         count += 1
         print(f"{(count/len(candidate_list))*100}%")
-            
+        
         doc_vector = np.zeros(index_keys)
 
         for index, term in enumerate(full_index.keys()):
@@ -120,7 +132,7 @@ def doc_and_call(query_vector, candidate_list):
                 doc_vector[index] = full_index[term][key_pair]["tf-idf"]
 
             results.append((key_pair, cosine_similarity_re(query_vector, doc_vector)))
-            
+        
     run_interface(results)
         
         
@@ -195,7 +207,7 @@ def run_interface(result_list):
     for key_pair in sorted_list:
         count += 1
         if count <= 10:
-            print(f"Result {count} {key_pair[1]}: {get_title(key_pair[0])}\n{datastore[key_pair[0]]}\n\n")
+            print(f"Result {count}: {get_title(key_pair[0])}\n{datastore[key_pair[0]]}\n\n")
         
     # Clear for next query
     results.clear()
