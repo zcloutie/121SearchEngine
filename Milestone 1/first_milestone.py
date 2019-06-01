@@ -29,22 +29,5 @@ def first_milestone():
                 
         print(f"{count}\n")
 
-
-def update_index_tfidf():
-    ''' Run this in the shell to update the index with tf-idf '''
-
-    N = 37497
-    
-    with open("../index.json", "r") as db:
-        full_index = json.load(db)
-
-    for term, postings in full_index.items():
-        term_idf = math.log(N/len(postings))
-        for key_pair in postings:
-            tf = 1 + math.log(full_index[term][key_pair]["tf"])
-            tf_idf = tf*term_idf
-            full_index[term][key_pair]["tf-idf"] = tf_idf
-
-
             
         

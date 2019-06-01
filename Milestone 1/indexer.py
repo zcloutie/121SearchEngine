@@ -88,16 +88,29 @@ def parse_html():
             for word in lesser_text:
                 db_ops(word, key_pair, "p")
         
-        
         soup.decompose()
-
-        '''
+        
         count +=1
 
         if count in [375, 1875, 3750, 7500, 15000, 20000, 25000, 30000, 35000]:
             print(f'{(count/37500)*100}%')
-        '''
+
+    update_index_tfidf()
             
+    
+    
+def update_index_tfidf():
+    ''' Update the index with tf-idf '''
+
+    N = 37497
+
+    for term, postings in db.items():
+        term_idf = math.log(N/len(postings))
+        for key_pair in postings:
+            tf = 1 + math.log(db[term][key_pair]["tf"])
+            tf_idf = tf*term_idf
+            db[term][key_pair]["tf-idf"] = tf_idf
+
 
 def db_ops(word, key_pair, tag):
     ''' Do DB operations '''
